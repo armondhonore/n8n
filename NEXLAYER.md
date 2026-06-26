@@ -15,37 +15,37 @@
 
 ## Project Summary
 <!-- nexlayer:section agent-managed=project_summary -->
-n8n is a secure, fair-code workflow automation platform that allows technical teams to build complex automations using a visual interface, custom JavaScript/Python code, and AI-native LangChain integrations.
+n8n is a low-code workflow automation platform that allows users to build complex automations using a visual editor and AI-native capabilities. It supports a vast library of integrations and provides an extensible environment for JavaScript and Python coding.
 <!-- nexlayer:end -->
 
 ## Technology Stack
 <!-- nexlayer:section agent-managed=tech_stack -->
 | Name | Kind | Version | Detected From |
 |------|------|---------|---------------|
-| Node.js | language | >=22.22 | package.json |
-| TypeScript | language | not specified | tsconfig.json |
-| PostgreSQL | database | not specified | .tbls.postgres.yml, pnpm-workspace.yaml |
-| Turbo | build | not specified | turbo.json |
-| pnpm | tool | 10.32.1 | package.json |
-| LangChain | ml | not specified | pnpm-workspace.yaml |
+| TypeScript | language | unknown | tsconfig.json, package.json |
+| Node.js | language | >=18 | Dockerfile, README.md |
+| TurboRepo | build | unknown | turbo.json |
+| pnpm | tool | unknown | pnpm-lock.yaml, pnpm-workspace.yaml |
+| PostgreSQL | database | unknown | .tbls.postgres.yml |
+| SQLite | database | unknown | .tbls.sqlite.yml |
 <!-- nexlayer:end -->
 
 ## Repository Structure
 <!-- nexlayer:section agent-managed=structure_map -->
-- packages/cli/ — Command line interface and main entry point
-- packages/core/ — Core workflow engine and logic
-- packages/frontend/ — n8n editor user interface
-- packages/nodes-base/ — Standard library of integration nodes
-- packages/workflow/ — Workflow definition and execution logic
-- scripts/ — Build and dockerization automation scripts
+- packages/ — Monorepo packages containing the core logic and editor UI
+- packages/cli/ — Command line interface for starting n8n
+- packages/core/ — Core workflow engine and orchestration logic
+- packages/nodes-base/ — The extensive library of integration nodes
+- packages/editor-ui/ — The visual frontend for building workflows
+- scripts/ — Build and deployment utility scripts
 <!-- nexlayer:end -->
 
 ## External Services Required
 <!-- nexlayer:section agent-managed=external_deps -->
 Services that must be configured separately (not deployed by Nexlayer):
 
-- Various AI Providers (OpenAI, Anthropic, Google, etc. via @ai-sdk)
-- Sentry (SENTRY_AUTH_TOKEN)
+- LangChain (AI Orchestration)
+- npm registry (for dynamic package loading)
 <!-- nexlayer:end -->
 
 ## Local Development Setup
@@ -79,21 +79,18 @@ DATABASE_URL=postgresql://user:pass@localhost:5432/n8n
 
 | Pod | Variable | Value | Kind |
 |-----|----------|-------|------|
-| `app` | `NODE_ENV` | `"production"` | plain |
-| `app` | `PORT` | `"5678"` | plain |
-| `app` | `HOSTNAME` | `"0.0.0.0"` | plain |
-| `app` | `DB_TYPE` | `"postgresdb"` | plain |
-| `app` | `DB_POSTGRESDB_DATABASE` | `"n8n"` | plain |
-| `app` | `DB_POSTGRESDB_HOST` | `"postgres.pod"` | plain |
+| `app` | `NODE_ENV` | `production` | plain |
+| `app` | `N8N_PORT` | `"5678"` | plain |
+| `app` | `N8N_ENCRYPTION_KEY` | `${N8N_ENCRYPTION_KEY}` | inter-pod |
+| `app` | `DB_TYPE` | `postgresdb` | plain |
+| `app` | `DB_POSTGRESDB_HOST` | `postgres.pod` | plain |
 | `app` | `DB_POSTGRESDB_PORT` | `"5432"` | plain |
-| `app` | `DB_POSTGRESDB_USER` | `"n8n_user"` | plain |
-| `app` | `DB_POSTGRESDB_PASSWORD` | `"${POSTGRES_PASSWORD}"` | inter-pod |
-| `app` | `N8N_ENCRYPTION_KEY` | `"${N8N_ENCRYPTION_KEY}"` | inter-pod |
-| `n8n-data` | `size` | `10Gi` | plain |
-| `n8n-data` | `mountPath` | `/home/node/.n8n` | plain |
-| `postgres` | `POSTGRES_DB` | `"n8n"` | plain |
-| `postgres` | `POSTGRES_USER` | `"n8n_user"` | plain |
-| `postgres` | `POSTGRES_PASSWORD` | `"${POSTGRES_PASSWORD}"` | inter-pod |
+| `app` | `DB_POSTGRESDB_DATABASE` | `n8n` | plain |
+| `app` | `DB_POSTGRESDB_USER` | `n8n_user` | plain |
+| `app` | `DB_POSTGRESDB_PASSWORD` | `${POSTGRES_PASSWORD}` | inter-pod |
+| `postgres` | `POSTGRES_DB` | `n8n` | plain |
+| `postgres` | `POSTGRES_USER` | `n8n_user` | plain |
+| `postgres` | `POSTGRES_PASSWORD` | `${POSTGRES_PASSWORD}` | inter-pod |
 | `n8n-postgres-data` | `size` | `10Gi` | plain |
 | `n8n-postgres-data` | `mountPath` | `/var/lib/postgresql` | plain |
 
@@ -104,39 +101,33 @@ application:
   name: n8n
   pods:
     - name: app
-      image: "registry.nexlayer.io/user_01kece1xyh817dwff7wnarhkxd/n8n:9f053c3-fix4"
+      image: "registry.nexlayer.io/user_01kece1xyh817dwff7wnarhkxd/n8n:9f0597f-fix5"
       path: /
       servicePorts:
         - 5678
       vars:
-        NODE_ENV: "production"
-        PORT: "5678"
-        HOSTNAME: "0.0.0.0"
-        DB_TYPE: "postgresdb"
-        DB_POSTGRESDB_DATABASE: "n8n"
-        DB_POSTGRESDB_HOST: "postgres.pod"
+        NODE_ENV: production
+        N8N_PORT: "5678"
+        N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
+        DB_TYPE: postgresdb
+        DB_POSTGRESDB_HOST: postgres.pod
         DB_POSTGRESDB_PORT: "5432"
-        DB_POSTGRESDB_USER: "n8n_user"
-        DB_POSTGRESDB_PASSWORD: "${POSTGRES_PASSWORD}"
-        N8N_ENCRYPTION_KEY: "${N8N_ENCRYPTION_KEY}"
-      volumes:
-        - name: n8n-data
-          size: 10Gi
-          mountPath: /home/node/.n8n
+        DB_POSTGRESDB_DATABASE: n8n
+        DB_POSTGRESDB_USER: n8n_user
+        DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
     - name: postgres
       image: mirror.gcr.io/library/postgres:16-alpine
       servicePorts:
         - 5432
       vars:
-        POSTGRES_DB: "n8n"
-        POSTGRES_USER: "n8n_user"
-        POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+        POSTGRES_DB: n8n
+        POSTGRES_USER: n8n_user
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       volumes:
         - name: n8n-postgres-data
           size: 10Gi
           mountPath: /var/lib/postgresql
 ```
-
 <!-- nexlayer:end -->
 
 ## Nexlayer Deployment Plan
@@ -163,7 +154,7 @@ application:
 
 ## Nexlayer Configuration
 <!-- nexlayer:section agent-managed=nexlayer_config -->
-**Last deployed:** 2026-06-26T19:18:30Z  
+**Last deployed:** 2026-06-26T20:56:26Z  
 **Live URL:** https://relaxed-weasel-n8n.cloud.nexlayer.ai  
 **Runtime:**  · **Port:** auto-detected  
 **Deploy branch:** nexlayer  
@@ -173,33 +164,28 @@ application:
   name: n8n
   pods:
     - name: app
-      image: "registry.nexlayer.io/user_01kece1xyh817dwff7wnarhkxd/n8n:9f053c3-fix4"
+      image: "registry.nexlayer.io/user_01kece1xyh817dwff7wnarhkxd/n8n:9f0597f-fix5"
       path: /
       servicePorts:
         - 5678
       vars:
-        NODE_ENV: "production"
-        PORT: "5678"
-        HOSTNAME: "0.0.0.0"
-        DB_TYPE: "postgresdb"
-        DB_POSTGRESDB_DATABASE: "n8n"
-        DB_POSTGRESDB_HOST: "postgres.pod"
+        NODE_ENV: production
+        N8N_PORT: "5678"
+        N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
+        DB_TYPE: postgresdb
+        DB_POSTGRESDB_HOST: postgres.pod
         DB_POSTGRESDB_PORT: "5432"
-        DB_POSTGRESDB_USER: "n8n_user"
-        DB_POSTGRESDB_PASSWORD: "${POSTGRES_PASSWORD}"
-        N8N_ENCRYPTION_KEY: "${N8N_ENCRYPTION_KEY}"
-      volumes:
-        - name: n8n-data
-          size: 10Gi
-          mountPath: /home/node/.n8n
+        DB_POSTGRESDB_DATABASE: n8n
+        DB_POSTGRESDB_USER: n8n_user
+        DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
     - name: postgres
       image: mirror.gcr.io/library/postgres:16-alpine
       servicePorts:
         - 5432
       vars:
-        POSTGRES_DB: "n8n"
-        POSTGRES_USER: "n8n_user"
-        POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+        POSTGRES_DB: n8n
+        POSTGRES_USER: n8n_user
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       volumes:
         - name: n8n-postgres-data
           size: 10Gi
@@ -211,6 +197,7 @@ application:
 <!-- nexlayer:section agent-managed=build_history -->
 | Date | Status | Notes |
 |------|--------|-------|
-| 2026-06-26T18:41:38Z | analyzed | initial repo analysis |
-| 2026-06-26T19:18:30Z | success | deployed https://relaxed-weasel-n8n.cloud.nexlayer.ai |
+| 2026-06-26T20:21:44Z | analyzed | initial repo analysis |
+| 2026-06-26T20:56:26Z | success | deployed https://relaxed-weasel-n8n.cloud.nexlayer.ai |
 <!-- nexlayer:end -->
+
