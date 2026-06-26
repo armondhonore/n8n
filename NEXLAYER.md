@@ -101,7 +101,7 @@ application:
   name: n8n
   pods:
     - name: app
-      image: "registry.nexlayer.io/user_01kece1xyh817dwff7wnarhkxd/n8n:9f0597f-fix5"
+      image: "registry.nexlayer.io/user_01kece1xyh817dwff7wnarhkxd/n8n:9f0597f-fix8"
       path: /
       servicePorts:
         - 5678
@@ -154,7 +154,7 @@ application:
 
 ## Nexlayer Configuration
 <!-- nexlayer:section agent-managed=nexlayer_config -->
-**Last deployed:** 2026-06-26T20:56:26Z  
+**Last deployed:** 2026-06-26T21:12:26Z  
 **Live URL:** https://relaxed-weasel-n8n.cloud.nexlayer.ai  
 **Runtime:**  · **Port:** auto-detected  
 **Deploy branch:** nexlayer  
@@ -164,7 +164,7 @@ application:
   name: n8n
   pods:
     - name: app
-      image: "registry.nexlayer.io/user_01kece1xyh817dwff7wnarhkxd/n8n:9f0597f-fix5"
+      image: "registry.nexlayer.io/user_01kece1xyh817dwff7wnarhkxd/n8n:9f0597f-fix8"
       path: /
       servicePorts:
         - 5678
@@ -198,6 +198,7 @@ application:
 | Date | Status | Notes |
 |------|--------|-------|
 | 2026-06-26T20:21:44Z | analyzed | initial repo analysis |
-| 2026-06-26T20:56:26Z | success | deployed https://relaxed-weasel-n8n.cloud.nexlayer.ai |
+| 2026-06-26T21:12:26Z | success | deployed https://relaxed-weasel-n8n.cloud.nexlayer.ai |
 <!-- nexlayer:end -->
+
 
