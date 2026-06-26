@@ -1,36 +1,35 @@
 application:
   name: n8n
   pods:
-  - name: app
-    image: n8nio/n8n:latest
-    path: /
-    servicePorts:
-    - 5678
-    vars:
-      N8N_HOST: "relaxed-weasel-n8n.cloud.nexlayer.ai"
-      N8N_PORT: "5678"
-      N8N_PROTOCOL: "https"
-      WEBHOOK_URL: "https://relaxed-weasel-n8n.cloud.nexlayer.ai"
-      N8N_ENCRYPTION_KEY: "e5f6a7b8c9d0e5f6a7b8c9d0e5f6a7b8"
-      DB_TYPE: postgresdb
-      DB_POSTGRESDB_HOST: postgres.pod
-      DB_POSTGRESDB_PORT: "5432"
-      DB_POSTGRESDB_DATABASE: n8n
-      DB_POSTGRESDB_USER: n8n
-      DB_POSTGRESDB_PASSWORD: n8npass
-    volumes:
-    - name: n8n-data
-      mountPath: /home/node/.n8n
-      size: 5Gi
-  - name: postgres
-    image: postgres:16-alpine
-    servicePorts:
-    - 5432
-    vars:
-      POSTGRES_DB: n8n
-      POSTGRES_USER: n8n
-      POSTGRES_PASSWORD: n8npass
-    volumes:
-    - name: n8n-postgres
-      mountPath: /var/lib/postgresql/data
-      size: 5Gi
+    - name: app
+      image: "registry.nexlayer.io/user_01kece1xyh817dwff7wnarhkxd/n8n:9f053c3-fix4"
+      path: /
+      servicePorts:
+        - 5678
+      vars:
+        NODE_ENV: "production"
+        PORT: "5678"
+        HOSTNAME: "0.0.0.0"
+        DB_TYPE: "postgresdb"
+        DB_POSTGRESDB_DATABASE: "n8n"
+        DB_POSTGRESDB_HOST: "postgres.pod"
+        DB_POSTGRESDB_PORT: "5432"
+        DB_POSTGRESDB_USER: "n8n_user"
+        DB_POSTGRESDB_PASSWORD: "${POSTGRES_PASSWORD}"
+        N8N_ENCRYPTION_KEY: "${N8N_ENCRYPTION_KEY}"
+      volumes:
+        - name: n8n-data
+          size: 10Gi
+          mountPath: /home/node/.n8n
+    - name: postgres
+      image: mirror.gcr.io/library/postgres:16-alpine
+      servicePorts:
+        - 5432
+      vars:
+        POSTGRES_DB: "n8n"
+        POSTGRES_USER: "n8n_user"
+        POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      volumes:
+        - name: n8n-postgres-data
+          size: 10Gi
+          mountPath: /var/lib/postgresql
